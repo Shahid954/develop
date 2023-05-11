@@ -1,0 +1,56 @@
+# Maven
+# Build your Java project and run tests with Apache Maven.
+# Add steps that analyze code, save build artifacts, deploy, and more:
+# https://docs.microsoft.com/azure/devops/pipelines/languages/java
+
+trigger:
+- main
+
+jobs:
+- job: Tax1099_firefox
+  displayName: 'Run on Firefox'
+  pool:
+    vmImage: 'windows-latest'
+  steps: 
+   - script: mvn clean test -DexecutionEnvironment=$(executionEnvironment) -DbrowserName=$(browserName_F) -DinstanceUrl=$(instanceUrl) -DsaucelabUsername=$(saucelabUsername) -DsaucelabAuthkey=$(saucelabAuthkey) -DsaucelabBrowserversion=$(saucelabBrowserversion) -DsaucelabPlatform=$(saucelabPlatform) -DsaucelabPlatformVersion=$(saucelabPlatformVersion) -DoutputPath=$(outputPath) -Dsurefire.suiteXmlFiles="testng.xml"
+     continueOnError: true
+   - task: CopyFiles@2
+     displayName: 'Copy Files to: $(build.artifactstagingdirectory)'
+     inputs:
+       SourceFolder: '$(system.defaultworkingdirectory)'
+       Contents: '**/*emailable-report.html'
+       TargetFolder: '$(build.artifactstagingdirectory)'
+   - task: CopyFiles@2
+     displayName: 'Copy Files to: $(build.artifactstagingdirectory)'
+     inputs:
+       SourceFolder: '$(system.defaultworkingdirectory)'
+       Contents: '**/screenshots/*.png'
+       TargetFolder: '$(build.artifactstagingdirectory)'  
+   - task: PublishBuildArtifacts@1
+     inputs:
+       PathtoPublish: '$(Build.ArtifactStagingDirectory)'
+       ArtifactName: 'Tax1099-report(firefox)'
+ 
+- job: Tax1099_chrome
+  displayName: 'Run on chrome'
+  pool:
+    vmImage: 'windows-latest'
+  steps: 
+   - script: mvn clean test -DexecutionEnvironment=$(executionEnvironment) -DbrowserName=$(browserName_C) -DinstanceUrl=$(instanceUrl) -DsaucelabUsername=$(saucelabUsername) -DsaucelabAuthkey=$(saucelabAuthkey) -DsaucelabBrowserversion=$(saucelabBrowserversion) -DsaucelabPlatform=$(saucelabPlatform) -DsaucelabPlatformVersion=$(saucelabPlatformVersion) -DoutputPath=$(outputPath) -Dsurefire.suiteXmlFiles="testng.xml"
+     continueOnError: true
+   - task: CopyFiles@2
+     displayName: 'Copy Files to: $(build.artifactstagingdirectory)'
+     inputs:
+       SourceFolder: '$(system.defaultworkingdirectory)'
+       Contents: '**/*emailable-report.html'
+       TargetFolder: '$(build.artifactstagingdirectory)'
+   - task: CopyFiles@2
+     displayName: 'Copy Files to: $(build.artifactstagingdirectory)'
+     inputs:
+       SourceFolder: '$(system.defaultworkingdirectory)'
+       Contents: '**/screenshots/*.png'
+       TargetFolder: '$(build.artifactstagingdirectory)'    
+   - task: PublishBuildArtifacts@1
+     inputs:
+       PathtoPublish: '$(Build.ArtifactStagingDirectory)'
+       ArtifactName: 'Tax1099-report(chrome)'
